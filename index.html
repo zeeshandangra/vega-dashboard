@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Vega Live · BankNifty Signals</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Bebas+Neue&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#04070d;--panel:#080d17;--border:#0f1c30;--border2:#162440;
+--bull:#00ff88;--bear:#ff2255;--warn:#ffaa00;--skip:#334466;--ovr:#9966ff;
+--text:#8ab0d8;--text2:#3a5a80;--white:#e8f4ff;--accent:#1166ff;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:13px;min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background-image:linear-gradient(rgba(17,102,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(17,102,255,0.03) 1px,transparent 1px);background-size:48px 48px;}
+.app{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:0 12px 40px;}
+
+/* TOP BAR */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border2);margin-bottom:14px;gap:10px;flex-wrap:wrap;}
+.logo{font-family:'Bebas Neue';font-size:24px;letter-spacing:3px;background:linear-gradient(90deg,var(--bull),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.market-time{font-family:'Space Mono';font-size:18px;color:var(--white);letter-spacing:2px;}
+.status-row-top{display:flex;align-items:center;gap:8px;font-size:11px;letter-spacing:1px;text-transform:uppercase;}
+.status-dot{width:7px;height:7px;border-radius:50%;background:var(--bull);animation:blink 1s infinite;}
+.status-dot.off{background:var(--text2);animation:none;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+
+/* REGIME */
+.regime-banner{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-radius:8px;border:2px solid;margin-bottom:14px;transition:all 0.5s;}
+.regime-banner.bull{border-color:var(--bull);background:rgba(0,255,136,0.06);box-shadow:0 0 30px rgba(0,255,136,0.15);}
+.regime-banner.bear{border-color:var(--bear);background:rgba(255,34,85,0.06);box-shadow:0 0 30px rgba(255,34,85,0.15);}
+.regime-banner.neutral{border-color:var(--border2);background:var(--panel);}
+.regime-label{font-family:'Bebas Neue';font-size:22px;letter-spacing:3px;}
+.regime-detail{font-size:11px;color:var(--text2);margin-top:3px;}
+.regime-val{font-family:'Space Mono';font-size:14px;text-align:right;}
+
+/* STATS */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px;}
+.stat-box{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:10px 12px;text-align:center;}
+.stat-box .sv{font-family:'Bebas Neue';font-size:24px;letter-spacing:1px;}
+.stat-box .sl{font-size:9px;color:var(--text2);letter-spacing:2px;text-transform:uppercase;margin-top:2px;}
+.v-bull{color:var(--bull)}.v-bear{color:var(--bear)}.v-warn{color:var(--warn)}.v-white{color:var(--white)}.v-skip{color:var(--skip)}
+
+/* ALERT SECTION — most important for mobile */
+.alert-section{margin-bottom:14px;}
+.alert-section h3{font-family:'Bebas Neue';font-size:13px;letter-spacing:2px;color:var(--text2);margin-bottom:8px;text-transform:uppercase;}
+
+.notification-card{background:var(--panel);border:1px solid var(--border2);border-radius:10px;padding:14px 16px;margin-bottom:8px;}
+.notification-card h4{font-size:12px;color:var(--white);margin-bottom:10px;font-weight:600;}
+.notification-card p{font-size:11px;color:var(--text2);line-height:1.6;margin-bottom:10px;}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;}
+.btn{padding:9px 16px;border-radius:6px;border:none;font-family:'Inter';font-size:12px;font-weight:600;cursor:pointer;transition:all 0.2s;letter-spacing:0.5px;}
+.btn-prim{background:var(--accent);color:#fff;}
+.btn-prim:hover{background:#2277ff;}
+.btn-grn{background:rgba(0,255,136,0.15);color:var(--bull);border:1px solid rgba(0,255,136,0.3);}
+.btn-grn:hover{background:rgba(0,255,136,0.25);}
+.btn-red{background:rgba(255,34,85,0.15);color:var(--bear);border:1px solid rgba(255,34,85,0.3);}
+.btn-red:hover{background:rgba(255,34,85,0.25);}
+.btn-neutral{background:transparent;border:1px solid var(--border2);color:var(--text);}
+.btn-neutral:hover{border-color:var(--accent);color:var(--accent);}
+.btn-warn{background:rgba(255,170,0,0.1);color:var(--warn);border:1px solid rgba(255,170,0,0.25);}
+
+.notif-status{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:4px;font-size:11px;font-weight:600;margin-top:8px;}
+.notif-on{background:rgba(0,255,136,0.1);color:var(--bull);border:1px solid rgba(0,255,136,0.2);}
+.notif-off{background:rgba(255,34,85,0.1);color:var(--bear);border:1px solid rgba(255,34,85,0.2);}
+
+/* SIGNAL LOG */
+.signal-log{margin-bottom:14px;}
+.signal-log-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.signal-log-header h3{font-family:'Bebas Neue';font-size:14px;letter-spacing:2px;color:var(--white);text-transform:uppercase;}
+
+.signal-card{border-radius:10px;overflow:hidden;margin-bottom:10px;border:1px solid;animation:cardIn 0.4s ease both;}
+.signal-card.buy{border-color:rgba(0,255,136,0.3);background:rgba(0,255,136,0.03);box-shadow:0 0 20px rgba(0,255,136,0.08);}
+.signal-card.sell{border-color:rgba(255,34,85,0.3);background:rgba(255,34,85,0.03);box-shadow:0 0 20px rgba(255,34,85,0.08);}
+.signal-card.skip-card{border-color:var(--border);background:var(--panel);opacity:0.65;}
+@keyframes cardIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+
+.sc-top{display:flex;align-items:center;gap:12px;padding:14px 16px;}
+.sc-time{font-family:'Bebas Neue';font-size:28px;color:var(--white);letter-spacing:1px;min-width:60px;}
+.sc-pill{padding:5px 14px;border-radius:5px;font-family:'Bebas Neue';font-size:16px;letter-spacing:2px;}
+.pill-buy{background:rgba(0,255,136,0.15);color:var(--bull);border:1px solid rgba(0,255,136,0.35);}
+.pill-sell{background:rgba(255,34,85,0.15);color:var(--bear);border:1px solid rgba(255,34,85,0.35);}
+.pill-skip{background:rgba(51,68,102,0.3);color:var(--skip);border:1px solid var(--border);}
+.sc-meta{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:4px;}
+.conf-dots{display:flex;gap:3px;}
+.cd{width:7px;height:7px;border-radius:50%;}
+.cd-buy{background:var(--bull)}.cd-sell{background:var(--bear)}.cd-off{background:var(--border2)}
+.sc-badge{padding:2px 8px;border-radius:3px;font-size:9px;font-weight:700;letter-spacing:1px;}
+.badge-star{background:rgba(255,170,0,0.12);color:var(--warn);border:1px solid rgba(255,170,0,0.25);}
+.badge-ovr{background:rgba(153,102,255,0.12);color:var(--ovr);border:1px solid rgba(153,102,255,0.25);}
+
+.sc-greeks{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);}
+.sc-greek{background:var(--panel);padding:8px 12px;}
+.sc-greek .gl{font-size:9px;color:var(--text2);letter-spacing:1px;text-transform:uppercase;}
+.sc-greek .gv{font-family:'Space Mono';font-size:13px;font-weight:700;margin-top:2px;}
+
+.sc-reason{padding:8px 16px 10px;font-size:11px;color:var(--text2);line-height:1.5;border-top:1px solid var(--border);}
+.sc-reason strong{color:var(--text);}
+
+.sc-exec{display:flex;flex-wrap:wrap;gap:6px;padding:8px 16px;background:rgba(0,0,0,0.3);border-top:1px solid var(--border);}
+.exec-tag{padding:3px 10px;border-radius:4px;font-size:10px;font-weight:600;background:var(--border);color:var(--text);}
+.exec-tag.sl{background:rgba(255,34,85,0.1);color:var(--bear);border:1px solid rgba(255,34,85,0.2);}
+.exec-tag.tp{background:rgba(0,255,136,0.1);color:var(--bull);border:1px solid rgba(0,255,136,0.2);}
+
+/* Input section */
+.input-section{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:14px;}
+.input-section h3{font-family:'Bebas Neue';font-size:14px;letter-spacing:2px;color:var(--white);margin-bottom:12px;text-transform:uppercase;}
+.input-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+.inp-group{display:flex;flex-direction:column;gap:4px;}
+.inp-group label{font-size:9px;color:var(--text2);letter-spacing:1.5px;text-transform:uppercase;}
+.inp-group input,.inp-group textarea{background:var(--bg);border:1px solid var(--border2);border-radius:4px;color:var(--white);font-family:'Space Mono';font-size:11px;padding:7px 10px;outline:none;width:100%;}
+.inp-group input:focus,.inp-group textarea:focus{border-color:var(--accent);}
+.inp-group textarea{min-height:80px;resize:vertical;font-size:11px;}
+.input-actions{display:flex;gap:8px;flex-wrap:wrap;}
+
+/* Full screen signal overlay (mobile alert replacement) */
+#signalOverlay{display:none;position:fixed;inset:0;z-index:9000;align-items:center;justify-content:center;flex-direction:column;animation:overlayIn 0.3s ease;}
+#signalOverlay.show{display:flex;}
+@keyframes overlayIn{from{opacity:0;transform:scale(0.95)}to{opacity:1;transform:scale(1)}}
+.overlay-bg{position:absolute;inset:0;}
+.overlay-bg.bull{background:rgba(0,255,136,0.92);}
+.overlay-bg.bear{background:rgba(255,34,85,0.92);}
+.overlay-content{position:relative;z-index:1;text-align:center;padding:40px 30px;max-width:380px;width:90%;}
+.overlay-signal{font-family:'Bebas Neue';font-size:80px;letter-spacing:4px;line-height:1;color:#000;text-shadow:0 4px 20px rgba(0,0,0,0.3);}
+.overlay-time{font-family:'Space Mono';font-size:28px;color:rgba(0,0,0,0.7);margin:8px 0;}
+.overlay-details{font-family:'Space Mono';font-size:14px;color:rgba(0,0,0,0.8);margin-top:12px;line-height:1.8;}
+.overlay-close{margin-top:28px;padding:14px 40px;border-radius:8px;background:rgba(0,0,0,0.2);border:none;font-family:'Bebas Neue';font-size:20px;letter-spacing:2px;color:#000;cursor:pointer;font-weight:700;}
+.overlay-close:hover{background:rgba(0,0,0,0.35);}
+.overlay-vibrate{animation:vibrate 0.4s ease;}
+@keyframes vibrate{0%,100%{transform:translate(0)}25%{transform:translate(-4px,2px)}75%{transform:translate(4px,-2px)}}
+
+/* Audio indicator */
+.audio-note{font-size:10px;color:var(--text2);margin-top:6px;font-style:italic;}
+
+@media(max-width:500px){
+  .stats-row{grid-template-columns:repeat(2,1fr);}
+  .input-grid{grid-template-columns:1fr;}
+  .sc-greeks{grid-template-columns:repeat(2,1fr);}
+}
+</style>
+</head>
+<body>
+
+<!-- FULL SCREEN SIGNAL OVERLAY -->
+<div id="signalOverlay">
+  <div class="overlay-bg" id="overlayBg"></div>
+  <div class="overlay-content">
+    <div class="overlay-signal" id="overlaySignal">BUY</div>
+    <div class="overlay-time" id="overlayTime">10:16</div>
+    <div class="overlay-details" id="overlayDetails">PE=+199 · θ=1.46 · CE_D=0.89</div>
+    <button class="overlay-close" onclick="closeOverlay()">TAP TO DISMISS</button>
+  </div>
+</div>
+
+<div class="app">
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="logo">VEGA LIVE</div>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <div class="market-time" id="clock">--:--:--</div>
+    <div class="status-row-top">
+      <div class="status-dot off" id="statusDot"></div>
+      <span id="statusText" style="font-size:10px;">IDLE</span>
+    </div>
+  </div>
+</div>
+
+<!-- REGIME -->
+<div class="regime-banner neutral" id="regimeBanner">
+  <div>
+    <div class="regime-label" id="regimeLabel" style="color:var(--text2)">NO DATA YET</div>
+    <div class="regime-detail" id="regimeDetail">Paste data or connect to server · signals fire automatically</div>
+  </div>
+  <div class="regime-val" id="regimeVal"></div>
+</div>
+
+<!-- STATS -->
+<div class="stats-row">
+  <div class="stat-box"><div class="sv v-bull" id="sBuy">0</div><div class="sl">BUY</div></div>
+  <div class="stat-box"><div class="sv v-bear" id="sSell">0</div><div class="sl">SELL</div></div>
+  <div class="stat-box"><div class="sv v-skip" id="sSkip">0</div><div class="sl">SKIPPED</div></div>
+  <div class="stat-box"><div class="sv v-white" id="sRows">0</div><div class="sl">ROWS</div></div>
+</div>
+
+<!-- ALERT OPTIONS -->
+<div class="alert-section">
+  <h3>Alert Settings</h3>
+
+  <div class="notification-card">
+    <h4>📳 Full-Screen Flash (Works on all phones)</h4>
+    <p>When a signal fires, the entire screen turns GREEN (BUY) or RED (SELL) with a loud sound. Keep your phone screen on during trading hours — this is the most reliable mobile alert.</p>
+    <div class="btn-row">
+      <button class="btn btn-grn" onclick="testAlert('BUY')">▲ Test BUY Alert</button>
+      <button class="btn btn-red" onclick="testAlert('SELL')">▼ Test SELL Alert</button>
+    </div>
+    <div class="audio-note">Sound plays automatically. Enable sound on your phone before market open.</div>
+  </div>
+
+  <div class="notification-card">
+    <h4>🔔 Browser Notification (Push-style)</h4>
+    <p>Allows alerts even when the screen is off, as long as this tab is open in the background.</p>
+    <div class="btn-row">
+      <button class="btn btn-prim" onclick="requestNotifPermission()" id="btnNotif">Enable Browser Notifications</button>
+      <button class="btn btn-neutral" onclick="testBrowserNotif()">Test</button>
+    </div>
+    <div id="notifStatus" class="notif-status notif-off">🔕 Notifications OFF</div>
+  </div>
+
+  <div class="notification-card">
+    <h4>📱 Keep Screen Awake (Mobile)</h4>
+    <p>Prevents your phone screen from sleeping while you're monitoring the market.</p>
+    <div class="btn-row">
+      <button class="btn btn-warn" onclick="toggleWakeLock()" id="btnWake">🔆 Keep Screen On</button>
+    </div>
+    <div id="wakeStatus" class="audio-note">Screen may sleep normally.</div>
+  </div>
+</div>
+
+<!-- DATA INPUT -->
+<div class="input-section">
+  <h3>Paste Greek Data</h3>
+  <div class="input-grid">
+    <div class="inp-group">
+      <label>Spike Threshold (pts)</label>
+      <input type="number" id="spikeThresh" value="60">
+    </div>
+    <div class="inp-group">
+      <label>PE Min for BUY</label>
+      <input type="number" id="peThresh" value="100">
+    </div>
+  </div>
+  <div class="inp-group" style="margin-bottom:10px;">
+    <label>Paste rows (tab/space separated) — or enter one row per minute manually</label>
+    <textarea id="dataInput" placeholder="09:17  326.08  89.73  -30.95  -36.52  -1.81  0.12&#10;09:18  326.35  92.31  -28.67  -35.43  -1.63  -0.49&#10;..."></textarea>
+  </div>
+  <div class="input-actions">
+    <button class="btn btn-prim" onclick="runBatch()">▶ Analyse Pasted Data</button>
+    <button class="btn btn-grn" onclick="startLiveInput()">⏱ Live Mode (add rows manually)</button>
+    <button class="btn btn-neutral" onclick="startDemo()">Demo Day</button>
+    <button class="btn btn-neutral" onclick="resetAll()">Reset</button>
+  </div>
+</div>
+
+<!-- SIGNAL LOG -->
+<div class="signal-log">
+  <div class="signal-log-header">
+    <h3>Signal Log</h3>
+    <span style="font-size:10px;color:var(--text2)" id="lastUpdate">—</span>
+  </div>
+  <div id="signalLog">
+    <div style="text-align:center;padding:30px;color:var(--text2);font-size:12px;">
+      <div style="font-size:28px;margin-bottom:10px;opacity:0.4">⚡</div>
+      Paste data above or tap Demo to see signals
+    </div>
+  </div>
+</div>
+
+</div><!-- .app -->
+
+<script>
+// ─── AUDIO ENGINE ─────────────────────────────────────────────────────────────
+let audioCtx = null;
+function getAudioCtx(){ if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)(); return audioCtx; }
+function playBeep(freq,dur,type='sine'){
+  try{
+    const ac=getAudioCtx(); const o=ac.createOscillator(); const g=ac.createGain();
+    o.connect(g); g.connect(ac.destination);
+    o.frequency.value=freq; o.type=type;
+    g.gain.setValueAtTime(0.7,ac.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+dur);
+    o.start(ac.currentTime); o.stop(ac.currentTime+dur);
+  }catch(e){}
+}
+function playBuySound(){
+  playBeep(520,0.12,'square'); setTimeout(()=>playBeep(660,0.18,'square'),130); setTimeout(()=>playBeep(880,0.3,'square'),280);
+}
+function playSellSound(){
+  playBeep(440,0.12,'sawtooth'); setTimeout(()=>playBeep(330,0.18,'sawtooth'),130); setTimeout(()=>playBeep(220,0.4,'sawtooth'),280);
+}
+
+// ─── CLOCK ────────────────────────────────────────────────────────────────────
+function updateClock(){
+  const ist=new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Kolkata'}));
+  const f=n=>String(n).padStart(2,'0');
+  document.getElementById('clock').textContent=`${f(ist.getHours())}:${f(ist.getMinutes())}:${f(ist.getSeconds())}`;
+}
+setInterval(updateClock,1000); updateClock();
+
+// ─── STATE ────────────────────────────────────────────────────────────────────
+let S={
+  rows:[], lastIdx:-99, openCE:null, bullFrame:null,
+  buys:0, sells:0, skips:0,
+  notifGranted:false, wakeLock:null
+};
+
+// ─── PLAYBOOK ENGINE ──────────────────────────────────────────────────────────
+function cfg(){return{spike:+document.getElementById('spikeThresh').value||60, peTh:+document.getElementById('peThresh').value||100};}
+
+function parseLine(line){
+  const p=line.trim().split(/\s+/);
+  if(p.length<7) return null;
+  const t=p[0]; if(t.length!==5||!t.includes(':')) return null;
+  try{
+    const ce_v=+p[1],pe_v=+p[2],ce_th=+p[3],pe_th=+p[4];
+    let ce_d,pe_d;
+    if(p.length>=12){ce_d=+p[9];pe_d=+p[10];}
+    else{ce_d=+p[5];pe_d=+p[6];}
+    return{time:t,ce_v,pe_v,ce_th,pe_th,ce_d,pe_d};
+  }catch{return null;}
+}
+
+function processRow(r,rowIdx){
+  const prev=S.rows[S.rows.length-1]||null;
+  S.rows.push(r);
+
+  if(r.time==='09:17'&&S.openCE===null){
+    S.openCE=r.ce_v; S.bullFrame=r.ce_v>0;
+    updateRegime();
+  }
+
+  if(!prev) return null;
+  const chg=r.ce_v-prev.ce_v, mag=Math.abs(chg);
+  const C=cfg();
+  if(mag<C.spike) return null;
+
+  let sig='SKIP',reason=[],conf=0,ovr=null,tr=null;
+
+  if(Math.abs(r.ce_d)>2.0){reason.push('Rollover |CE_D|>2');S.skips++;return{sig:'SKIP',r,chg,conf:0,reason,time:r.time};}
+  if(rowIdx-S.lastIdx<5){reason.push(`Cooldown (${rowIdx-S.lastIdx} candles)`);S.skips++;return{sig:'SKIP',r,chg,conf:0,reason,time:r.time};}
+  if(r.ce_v<-250&&r.pe_v<50){reason.push('CASE1: CE<−250 + PE<+50');S.skips++;S.lastIdx=rowIdx;return{sig:'SKIP',r,chg,conf:1,ovr:'CASE1',reason,time:r.time};}
+
+  const bf=S.bullFrame, sn=chg<0;
+  if(bf&&sn){sig='BUY';reason.push(`BULL frame + neg spike(${chg.toFixed(0)}) → REVERSAL → BUY`);}
+  else if(!bf&&sn){sig='SELL';reason.push(`BEAR frame + neg spike(${chg.toFixed(0)}) → CONTINUATION → SELL`);}
+  else if(!bf&&!sn){sig='BUY';reason.push(`BEAR frame + pos spike(+${chg.toFixed(0)}) → RECOVERY → BUY`);}
+  else{sig='BUY';reason.push(`BULL frame + pos spike(+${chg.toFixed(0)}) → CONTINUATION → BUY`);}
+  conf++;
+
+  if(sig==='BUY'&&r.ce_th!==0&&r.pe_th!==0){
+    tr=Math.abs(r.ce_th)/Math.abs(r.pe_th);
+    if(tr<1.0){sig='SELL';ovr='OVR1';reason.push(`OVR1: θ=${tr.toFixed(2)}<1.0 → put dominant → flip SELL`);}
+    else{conf++;reason.push(`θ=${tr.toFixed(2)}>1.0 ✓ call dominant`);}
+  }
+
+  if(sig==='BUY'){
+    if(r.pe_v>C.peTh){conf++;reason.push(`PE=+${r.pe_v.toFixed(0)}>${C.peTh} ✓`);}
+    else if(r.pe_v<0){conf--;reason.push(`PE=${r.pe_v.toFixed(0)}<0 ✗ conflict`);}
+    else if(r.pe_v<50){reason.push(`PE=+${r.pe_v.toFixed(0)} weak`);}
+    else{reason.push(`PE=+${r.pe_v.toFixed(0)} moderate`);}
+  } else if(sig==='SELL'){
+    if(r.pe_v<50){conf++;reason.push(`PE=${r.pe_v.toFixed(0)}<+50 confirms`);}
+    else if(r.pe_v>100){conf--;reason.push(`PE=+${r.pe_v.toFixed(0)}>100 conflicts`);}
+  }
+
+  if(Math.abs(r.ce_d)>=0.3&&Math.abs(r.ce_d)<=2.0){conf++;reason.push(`|CE_D|=${Math.abs(r.ce_d).toFixed(2)} ✓ ATM`);}
+  else if(Math.abs(r.ce_d)<0.3){reason.push(`|CE_D|=${Math.abs(r.ce_d).toFixed(2)} ✗ OTM`);}
+  if(mag>=100){conf++;reason.push(`Spike ${mag.toFixed(0)}pts ≥100 ✓`);}
+  conf=Math.max(0,Math.min(4,conf));
+
+  if(sig==='BUY')S.buys++;
+  else if(sig==='SELL')S.sells++;
+  else S.skips++;
+
+  if(sig!=='SKIP')S.lastIdx=rowIdx;
+  return{sig,r,chg,conf,ovr,reason,tr,time:r.time};
+}
+
+// ─── UI UPDATES ───────────────────────────────────────────────────────────────
+function updateRegime(){
+  const banner=document.getElementById('regimeBanner');
+  const lbl=document.getElementById('regimeLabel');
+  const det=document.getElementById('regimeDetail');
+  const val=document.getElementById('regimeVal');
+  if(S.openCE===null) return;
+  if(S.bullFrame){
+    banner.className='regime-banner bull';
+    lbl.style.color='var(--bull)'; lbl.textContent='▲ BULL FRAME';
+    det.textContent='neg spikes = BUY reversals · pos spikes = BUY continuations';
+    val.style.color='var(--bull)'; val.textContent=`CE@09:17 = +${S.openCE.toFixed(0)}`;
+  } else {
+    banner.className='regime-banner bear';
+    lbl.style.color='var(--bear)'; lbl.textContent='▼ BEAR FRAME';
+    det.textContent='neg spikes = SELL continuations · pos spikes = BUY recoveries';
+    val.style.color='var(--bear)'; val.textContent=`CE@09:17 = ${S.openCE.toFixed(0)}`;
+  }
+}
+
+function updateStats(){
+  document.getElementById('sBuy').textContent=S.buys;
+  document.getElementById('sSell').textContent=S.sells;
+  document.getElementById('sSkip').textContent=S.skips;
+  document.getElementById('sRows').textContent=S.rows.length;
+}
+
+function renderSignal(result){
+  if(!result) return;
+  const log=document.getElementById('signalLog');
+  if(log.querySelector('div[style]')) log.innerHTML='';
+
+  const isBuy=result.sig==='BUY', isSell=result.sig==='SELL', isSkip=result.sig==='SKIP';
+  const r=result.r;
+  const tr=result.tr?result.tr.toFixed(2):'—';
+
+  let cardClass=isSkip?'signal-card skip-card':isBuy?'signal-card buy':'signal-card sell';
+  let pillClass=isSkip?'pill-skip':isBuy?'pill-buy':'pill-sell';
+  let pillText=isSkip?'— SKIP':isBuy?'▲ BUY':'▼ SELL';
+  let dotCls=isBuy?'cd-buy':'cd-sell';
+
+  const dots=Array(4).fill(0).map((_,i)=>`<div class="cd ${i<result.conf?dotCls:'cd-off'}"></div>`).join('');
+  const badge=result.ovr?`<span class="sc-badge badge-ovr">${result.ovr}</span>`:(result.conf>=4?`<span class="sc-badge badge-star">★ HIGH</span>`:'');
+  const ceColor=isBuy?'var(--bull)':'var(--bear)';
+  const peColor=r.pe_v>100?'var(--bull)':r.pe_v<0?'var(--bear)':'var(--warn)';
+
+  const card=document.createElement('div');
+  card.className=cardClass;
+  card.innerHTML=`
+    <div class="sc-top">
+      <div class="sc-time">${result.time}</div>
+      <div class="sc-pill ${pillClass}">${pillText}</div>
+      <div class="conf-dots" style="margin-left:8px">${dots}</div>
+      <div class="sc-meta">${badge}</div>
+    </div>
+    ${!isSkip?`<div class="sc-greeks">
+      <div class="sc-greek"><div class="gl">CE Vega</div><div class="gv" style="color:${ceColor}">${(r.ce_v>0?'+':'')+r.ce_v.toFixed(1)}<span style="font-size:9px;color:var(--text2)"> Δ${result.chg>0?'+':''}${result.chg.toFixed(0)}</span></div></div>
+      <div class="sc-greek"><div class="gl">PE Vega</div><div class="gv" style="color:${peColor}">${(r.pe_v>0?'+':'')+r.pe_v.toFixed(1)}</div></div>
+      <div class="sc-greek"><div class="gl">θ Ratio</div><div class="gv" style="color:${parseFloat(tr)>1?'var(--bull)':'var(--bear)'}">${tr}</div></div>
+      <div class="sc-greek"><div class="gl">CE Delta</div><div class="gv" style="color:var(--warn)">${r.ce_d?(r.ce_d>0?'+':'')+r.ce_d.toFixed(2):'—'}</div></div>
+    </div>`:''}
+    <div class="sc-reason">${result.reason.join(' · ')}</div>
+    ${!isSkip?`<div class="sc-exec">
+      <span class="exec-tag">Entry: ${result.time} candle open</span>
+      <span class="exec-tag sl">SL: candle ${isBuy?'low−5':'high+5'}pts</span>
+      <span class="exec-tag tp">TP1: 1.5×SL (50% exit)</span>
+      <span class="exec-tag tp">TP2: 3.0×SL</span>
+    </div>`:''}
+  `;
+  log.insertBefore(card,log.firstChild);
+  document.getElementById('lastUpdate').textContent=`Last: ${result.time} IST`;
+  updateStats();
+}
+
+// ─── FULL SCREEN ALERT ────────────────────────────────────────────────────────
+function showSignalAlert(result){
+  const overlay=document.getElementById('signalOverlay');
+  const bg=document.getElementById('overlayBg');
+  const sig=document.getElementById('overlaySignal');
+  const time=document.getElementById('overlayTime');
+  const det=document.getElementById('overlayDetails');
+  const r=result.r;
+  const tr=result.tr?`θ=${result.tr.toFixed(2)}`:'';
+  const pe=`PE=${r.pe_v>0?'+':''}${r.pe_v.toFixed(0)}`;
+  const ced=`CE_D=${r.ce_d?(Math.abs(r.ce_d).toFixed(2)):'—'}`;
+  bg.className='overlay-bg '+(result.sig==='BUY'?'bull':'bear');
+  sig.textContent=result.sig==='BUY'?'▲ BUY':'▼ SELL';
+  time.textContent=result.time+' IST';
+  det.innerHTML=`${pe} · ${tr} · ${ced}<br>${result.ovr?'OVR1 Override':'Matrix Signal'}`;
+  overlay.className='show';
+  overlay.style.display='flex';
+  if(result.sig==='BUY') playBuySound(); else playSellSound();
+  // Auto-close after 8s
+  setTimeout(closeOverlay,8000);
+  // Vibrate
+  if(navigator.vibrate) navigator.vibrate([200,100,200,100,400]);
+}
+
+function closeOverlay(){
+  document.getElementById('signalOverlay').style.display='none';
+  document.getElementById('signalOverlay').className='';
+}
+
+function testAlert(type){
+  // Unlock audio on user gesture
+  getAudioCtx();
+  showSignalAlert({sig:type,time:'TEST',ovr:null,conf:4,tr:1.46,r:{ce_v:220,pe_v:199,ce_d:-0.82,pe_d:0.1}});
+}
+
+// ─── BROWSER NOTIFICATIONS ────────────────────────────────────────────────────
+async function requestNotifPermission(){
+  if(!('Notification' in window)){alert('Your browser does not support notifications.');return;}
+  const perm=await Notification.requestPermission();
+  S.notifGranted=(perm==='granted');
+  const el=document.getElementById('notifStatus');
+  const btn=document.getElementById('btnNotif');
+  if(S.notifGranted){
+    el.className='notif-status notif-on'; el.textContent='🔔 Notifications ON';
+    btn.textContent='✓ Enabled'; btn.className='btn btn-neutral';
+  } else {
+    el.className='notif-status notif-off'; el.textContent='🔕 Permission Denied — use Full Screen Flash instead';
+  }
+}
+
+function testBrowserNotif(){
+  if(!S.notifGranted){alert('Enable notifications first.');return;}
+  new Notification('▲ BUY SIGNAL — TEST',{body:'10:14 · PE=+201 · θ=1.46 · ATM ✓\nEntry: 10:14 candle open · SL: candle low −5pts',icon:'',tag:'vega-signal'});
+}
+
+function sendBrowserNotif(result){
+  if(!S.notifGranted) return;
+  const r=result.r;
+  const body=`${result.sig==='BUY'?'▲ BUY':'▼ SELL'} @ ${result.time}\nPE=${r.pe_v>0?'+':''}${r.pe_v.toFixed(0)} · θ=${result.tr?result.tr.toFixed(2):'—'} · CE_D=${r.ce_d?Math.abs(r.ce_d).toFixed(2):'—'}\nEntry: ${result.time} candle open`;
+  new Notification(`${result.sig==='BUY'?'▲ BUY':'▼ SELL'} SIGNAL — BankNifty`,{body,tag:'vega-'+result.time});
+}
+
+// ─── WAKE LOCK ────────────────────────────────────────────────────────────────
+async function toggleWakeLock(){
+  const btn=document.getElementById('btnWake');
+  const status=document.getElementById('wakeStatus');
+  if(S.wakeLock){
+    S.wakeLock.release(); S.wakeLock=null;
+    btn.textContent='🔆 Keep Screen On'; status.textContent='Screen may sleep normally.'; return;
+  }
+  try{
+    if(!('wakeLock' in navigator)){status.textContent='Wake Lock not supported on this browser. Keep your phone plugged in and brightness up.';return;}
+    S.wakeLock=await navigator.wakeLock.request('screen');
+    btn.textContent='🔅 Release Screen Lock';
+    status.textContent='✓ Screen will stay on while this tab is open.';
+    S.wakeLock.addEventListener('release',()=>{S.wakeLock=null;btn.textContent='🔆 Keep Screen On';status.textContent='Wake lock released.';});
+  }catch(e){status.textContent='Could not lock screen: '+e.message;}
+}
+
+// ─── FIRE SIGNAL ─────────────────────────────────────────────────────────────
+function fireSignal(result){
+  renderSignal(result);
+  if(result.sig!=='SKIP'){
+    showSignalAlert(result);
+    sendBrowserNotif(result);
+  }
+}
+
+// ─── BATCH ANALYSIS ──────────────────────────────────────────────────────────
+function runBatch(){
+  resetAll();
+  const lines=document.getElementById('dataInput').value.trim().split('\n');
+  let rowIdx=0;
+  for(const line of lines){
+    if(!line.trim()) continue;
+    const r=parseLine(line);
+    if(!r||r.time==='09:16') continue;
+    const result=processRow(r,rowIdx++);
+    if(result) fireSignal(result);
+    else updateStats();
+  }
+  document.getElementById('statusDot').className='status-dot off';
+  document.getElementById('statusText').textContent=`Done · ${S.rows.length} rows`;
+}
+
+// ─── LIVE MODE (manual one-row-at-a-time) ─────────────────────────────────────
+// Polls data input every 60s looking for new rows — perfect for pasting one new minute at a time
+let liveTimer=null, liveRowIdx=0;
+function startLiveInput(){
+  if(liveTimer){clearInterval(liveTimer);liveTimer=null;document.getElementById('statusText').textContent='STOPPED';document.getElementById('statusDot').className='status-dot off';return;}
+  document.getElementById('statusDot').className='status-dot';
+  document.getElementById('statusText').textContent='LIVE — paste new row each minute';
+  liveRowIdx=S.rows.length;
+  liveTimer=setInterval(()=>{
+    const lines=document.getElementById('dataInput').value.trim().split('\n');
+    const newLines=lines.slice(liveRowIdx);
+    for(const line of newLines){
+      const r=parseLine(line);
+      if(!r||r.time==='09:16') continue;
+      liveRowIdx++;
+      const result=processRow(r,S.rows.length-1);
+      if(result) fireSignal(result);
+      else updateStats();
+    }
+  },2000);// check every 2s for new pasted rows
+}
+
+// ─── DEMO ─────────────────────────────────────────────────────────────────────
+const DEMO=[
+  "09:17  326.08  89.73  -30.95  -36.52  -1.81  0.12",
+  "09:18  326.35  92.31  -28.67  -35.43  -1.63  -0.49",
+  "09:19  324.55  90.33  -29.96  -35.43  -1.71  -0.39",
+  "09:20  220.46  198.99  -30.62  -24.14  -1.12  -0.82",
+  "09:21  221.13  199.53  -33.53  -26.3   -1.11  -0.83",
+  "09:22  220.2   198.05  -32.81  -24.56  -1.16  -0.8",
+  "09:23  220.84  200.67  -29.16  -23.41  -1.06  -0.87",
+  "09:24  220.46  198.99  -30.57  -25.07  -1.13  -0.83",
+  "09:25  220.84  200.67  -29.16  -23.41  -1.06  -0.87",
+  "09:26  220.26  199.1   -28.24  -24.97  -1.13  -0.84",
+  "09:27  324.6   87.09   -25.86  -32.87  -1.81  -0.33",
+  "09:28  325.15  88.96   -41.09  -31.47  -1.76  -0.37",
+  "09:29  324.9   88.11   -39.35  -32.28  -1.76  -0.36",
+  "09:30  86.67   21.5    -33.46  -14.6   -0.66  0.07",
+  "09:31  86.81   21.9    -33.48  -13.91  -0.61  0.03",
+  "09:32  86.81   22.1    -34.08  -13.76  -0.64  0.07",
+  "09:33  326.25  91.13   -35.14  -31.27  -1.68  -0.43",
+  "09:34  86.64   22.3    -34.16  -14.04  -0.68  0.08",
+  "10:14  220.92  200.51  -33.42  -22.95  -1.03  -0.89",
+  "10:15  325.33  88.91   -30.06  -30.6   -1.71  -0.38",
+  "10:21  323.29  85.87   -31.12  -31.84  -1.82  -0.33",
+  "10:28  217.91  195.67  -46.93  -22.13  -1.2   -0.77",
+  "10:58  219.03  198.93  -40.23  -22.6   -1.07  -0.84",
+  "11:51  218.4   197.65  -41.56  -22.89  -1.14  -0.81",
+];
+let demoI=0,demoT=null;
+function startDemo(){
+  resetAll();
+  if(demoT)clearInterval(demoT);
+  demoI=0;
+  document.getElementById('statusDot').className='status-dot';
+  document.getElementById('statusText').textContent='DEMO · 1 row/sec';
+  demoT=setInterval(()=>{
+    if(demoI>=DEMO.length){clearInterval(demoT);document.getElementById('statusDot').className='status-dot off';document.getElementById('statusText').textContent='DEMO DONE';return;}
+    const r=parseLine(DEMO[demoI++]);
+    if(r){const res=processRow(r,S.rows.length-1);if(res)fireSignal(res);else updateStats();}
+  },1500);
+}
+
+function resetAll(){
+  S={...S,rows:[],lastIdx:-99,openCE:null,bullFrame:null,buys:0,sells:0,skips:0};
+  document.getElementById('regimeBanner').className='regime-banner neutral';
+  document.getElementById('regimeLabel').style.color='var(--text2)';
+  document.getElementById('regimeLabel').textContent='NO DATA YET';
+  document.getElementById('regimeDetail').textContent='Paste data or connect to server · signals fire automatically';
+  document.getElementById('regimeVal').textContent='';
+  document.getElementById('signalLog').innerHTML=`<div style="text-align:center;padding:30px;color:var(--text2);font-size:12px;"><div style="font-size:28px;margin-bottom:10px;opacity:0.4">⚡</div>Ready</div>`;
+  updateStats();
+}
+</script>
+</body>
+</html>
