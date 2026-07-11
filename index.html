@@ -3,20 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Vega Live · BankNifty</title>
+<title>Vega Live &middot; BankNifty</title>
 <style>
   :root {
-    --bg: #080c14;
-    --panel: #0e1420;
-    --panel2: #121a28;
-    --border: #1a2535;
-    --text: #dce8f0;
-    --muted: #4a6080;
-    --green: #00e676;
-    --red: #ff3d57;
-    --cyan: #00c8e0;
-    --gold: #ffc840;
-    --purple: #a855f7;
+    --bg: #eef2f7;
+    --panel: #ffffff;
+    --panel2: #f2f5fa;
+    --border: #cfd8e3;
+    --text: #10151c;
+    --muted: #5a6b80;
+    --green: #0a8f3c;
+    --red: #d11f36;
+    --cyan: #0a7ea8;
+    --gold: #b8860b;
+    --purple: #8b3fd4;
     --font: 'Courier New', monospace;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -43,8 +43,8 @@
 
   /* FRAME BANNER */
   #frame-banner { padding:8px 16px; text-align:center; font-size:0.8rem; font-weight:700; letter-spacing:0.15em; color:var(--muted); background:var(--panel2); border-bottom:1px solid var(--border); }
-  #frame-banner.bull { background:#001a00; color:var(--green); border-color:#003300; }
-  #frame-banner.bear { background:#1a0005; color:var(--red); border-color:#330010; }
+  #frame-banner.bull { background:#e4f6ea; color:#0a7d34; border-color:#a9ddbc; }
+  #frame-banner.bear { background:#fce9ec; color:#c01028; border-color:#f2c2ca; }
 
   main { padding:12px; max-width:960px; margin:0 auto; }
 
@@ -58,13 +58,13 @@
   .counter.skip .num { color:var(--gold); }
 
   /* PANELS */
-  .panel { background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:14px; margin-bottom:12px; }
+  .panel { background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:14px; margin-bottom:12px; box-shadow:0 1px 3px rgba(16,21,28,0.06); }
   .panel-title { font-size:0.65rem; color:var(--cyan); letter-spacing:0.15em; text-transform:uppercase; margin-bottom:12px; display:flex; align-items:center; gap:6px; }
   .panel-title::before { content:''; display:inline-block; width:3px; height:12px; background:var(--cyan); border-radius:2px; }
 
   /* CONNECT SECTION */
   .server-url-row { display:flex; gap:8px; margin-bottom:8px; }
-  .server-url-row input { flex:1; background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:8px 10px; color:var(--text); font-family:var(--font); font-size:0.8rem; }
+  .server-url-row input { flex:1; background:var(--panel2); border:1px solid var(--border); border-radius:6px; padding:8px 10px; color:var(--text); font-family:var(--font); font-size:0.8rem; }
   .server-url-row input:focus { outline:none; border-color:var(--cyan); }
 
   /* CONFIG SELECTOR */
@@ -72,13 +72,13 @@
   #config-section.visible { display:block; }
   .config-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px; }
   .config-col h4 { font-size:0.65rem; color:var(--gold); letter-spacing:0.1em; margin-bottom:8px; }
-  .expiry-list { max-height:140px; overflow-y:auto; background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:6px; }
+  .expiry-list { max-height:140px; overflow-y:auto; background:var(--panel2); border:1px solid var(--border); border-radius:6px; padding:6px; }
   .expiry-item { display:flex; align-items:center; gap:6px; padding:3px 4px; font-size:0.72rem; cursor:pointer; border-radius:4px; }
-  .expiry-item:hover { background:var(--panel2); }
+  .expiry-item:hover { background:#e4e9f1; }
   .expiry-item input { accent-color:var(--cyan); cursor:pointer; }
   .strikes-row { display:flex; gap:6px; flex-wrap:wrap; margin-top:6px; }
-  .strike-btn { padding:4px 10px; border-radius:4px; border:1px solid var(--border); background:var(--bg); color:var(--muted); font-family:var(--font); font-size:0.72rem; cursor:pointer; }
-  .strike-btn.active { background:var(--cyan); color:#000; border-color:var(--cyan); font-weight:700; }
+  .strike-btn { padding:4px 10px; border-radius:4px; border:1px solid var(--border); background:var(--panel2); color:var(--muted); font-family:var(--font); font-size:0.72rem; cursor:pointer; }
+  .strike-btn.active { background:var(--cyan); color:#fff; border-color:var(--cyan); font-weight:700; }
 
   #fetch-status { font-size:0.72rem; margin-top:8px; color:var(--muted); min-height:18px; }
   #fetch-status.ok { color:var(--green); }
@@ -88,48 +88,49 @@
   /* BUTTONS */
   .btn { padding:8px 14px; border:none; border-radius:6px; font-family:var(--font); font-size:0.75rem; font-weight:700; cursor:pointer; letter-spacing:0.06em; transition:opacity 0.15s; }
   .btn:hover { opacity:0.82; }
-  .btn-cyan { background:var(--cyan); color:#000; }
+  .btn-cyan { background:var(--cyan); color:#fff; }
   .btn-red { background:#c0192a; color:#fff; }
-  .btn-green { background:#0d3d1a; color:var(--green); border:1px solid #1a5c28; }
-  .btn-gold { background:#3d2d00; color:var(--gold); border:1px solid #5c4400; }
+  .btn-green { background:#e4f6ea; color:#0a7d34; border:1px solid #a9ddbc; }
+  .btn-gold { background:#fdf4d8; color:#8a6400; border:1px solid #e6d491; }
   .btn-outline { background:transparent; color:var(--muted); border:1px solid var(--border); }
   .btn-row { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
 
   /* PARAMS */
   .params-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
   .param-group label { font-size:0.6rem; color:var(--muted); letter-spacing:0.1em; display:block; margin-bottom:4px; }
-  .param-group input { width:100%; background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:8px; color:var(--text); font-family:var(--font); font-size:0.9rem; text-align:center; }
+  .param-group input { width:100%; background:var(--panel2); border:1px solid var(--border); border-radius:6px; padding:8px; color:var(--text); font-family:var(--font); font-size:0.9rem; text-align:center; }
   .param-group input:focus { outline:none; border-color:var(--cyan); }
 
   /* PASTE */
-  textarea { width:100%; background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:10px; color:var(--text); font-family:var(--font); font-size:0.75rem; resize:vertical; min-height:90px; }
+  textarea { width:100%; background:var(--panel2); border:1px solid var(--border); border-radius:6px; padding:10px; color:var(--text); font-family:var(--font); font-size:0.75rem; resize:vertical; min-height:90px; }
   textarea:focus { outline:none; border-color:var(--cyan); }
 
   /* ALERTS */
   .alert-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-  .alert-card { background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:12px; }
+  .alert-card { background:var(--panel2); border:1px solid var(--border); border-radius:8px; padding:12px; }
   .alert-card-title { font-size:0.6rem; color:var(--muted); letter-spacing:0.1em; margin-bottom:8px; }
 
   /* SIGNAL LOG */
   #signal-log { max-height:450px; overflow-y:auto; }
-  .sig { border-left:3px solid var(--border); padding:10px 12px; margin-bottom:8px; background:var(--bg); border-radius:0 6px 6px 0; }
+  .sig { border-left:3px solid var(--border); padding:10px 12px; margin-bottom:8px; background:var(--panel2); border-radius:0 6px 6px 0; }
   .sig.buy { border-color:var(--green); }
   .sig.sell { border-color:var(--red); }
   .sig.ovr { border-color:var(--gold); }
-  .sig.skip { border-color:var(--muted); opacity:0.45; }
+  .sig.skip { border-color:var(--muted); opacity:0.5; }
   .sig-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:3px; }
   .sig-type { font-weight:900; font-size:0.9rem; }
   .sig-type.buy { color:var(--green); }
   .sig-type.sell { color:var(--red); }
   .sig-type.ovr { color:var(--gold); }
+  .sig-stars { color:var(--gold); font-weight:900; letter-spacing:2px; margin-left:6px; }
   .sig-time { font-size:0.68rem; color:var(--muted); }
   .sig-detail { font-size:0.68rem; color:var(--muted); }
   .empty-log { text-align:center; padding:40px 20px; color:var(--muted); font-size:0.8rem; }
 
   #notif-status { font-size:0.7rem; margin-top:6px; color:var(--muted); }
-  
+
   ::-webkit-scrollbar { width:4px; }
-  ::-webkit-scrollbar-track { background:var(--bg); }
+  ::-webkit-scrollbar-track { background:var(--panel2); }
   ::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
 </style>
 </head>
@@ -149,7 +150,7 @@
   </div>
 </header>
 
-<div id="frame-banner">FRAME NOT SET — WAITING FOR 09:17 DATA</div>
+<div id="frame-banner">FRAME NOT SET &mdash; WAITING FOR 09:17 DATA</div>
 
 <main>
 
@@ -189,7 +190,7 @@
           </div>
         </div>
       </div>
-      <button class="btn btn-cyan" style="width:100%" onclick="startFetch()">⚡ FETCH & CONNECT</button>
+      <button class="btn btn-cyan" style="width:100%" onclick="startFetch()">&#9889; FETCH &amp; CONNECT</button>
     </div>
 
     <div id="fetch-status">Enter proxy URL and tap LOAD CONFIG</div>
@@ -216,8 +217,8 @@
     <div class="panel-title">Paste Greek Data (Manual)</div>
     <textarea id="paste-area" placeholder="09:17&#9;326.08&#9;89.73&#9;-30.95&#9;-36.52&#9;-1.81&#9;0.12&#10;09:18&#9;326.35&#9;92.31&#9;-28.67&#9;-35.43&#9;-1.63&#9;-0.49"></textarea>
     <div class="btn-row">
-      <button class="btn btn-cyan" onclick="analysePasted()">▶ ANALYSE</button>
-      <button class="btn btn-green" onclick="startLiveMode()">⊙ LIVE MODE</button>
+      <button class="btn btn-cyan" onclick="analysePasted()">&#9654; ANALYSE</button>
+      <button class="btn btn-green" onclick="startLiveMode()">&#8857; LIVE MODE</button>
       <button class="btn btn-gold" onclick="runDemo()">DEMO</button>
       <button class="btn btn-outline" onclick="resetAll()">RESET</button>
     </div>
@@ -229,17 +230,17 @@
     <div class="alert-grid">
       <div class="alert-card">
         <div class="alert-card-title">FULL-SCREEN FLASH</div>
-        <button class="btn btn-green" style="width:100%;margin-bottom:6px" onclick="fireAlert('BUY')">▲ Test BUY</button>
-        <button class="btn btn-red" style="width:100%" onclick="fireAlert('SELL')">▼ Test SELL</button>
+        <button class="btn btn-green" style="width:100%;margin-bottom:6px" onclick="fireAlert('BUY')">&#9650; Test BUY</button>
+        <button class="btn btn-red" style="width:100%" onclick="fireAlert('SELL')">&#9660; Test SELL</button>
       </div>
       <div class="alert-card">
         <div class="alert-card-title">BROWSER NOTIFICATIONS</div>
         <button class="btn btn-cyan" style="width:100%;margin-bottom:6px" onclick="enableNotif()">Enable</button>
-        <div id="notif-status">🔕 OFF</div>
+        <div id="notif-status">&#128277; OFF</div>
       </div>
       <div class="alert-card" style="grid-column:1/-1">
         <div class="alert-card-title">KEEP SCREEN AWAKE</div>
-        <button class="btn btn-outline" style="width:100%" id="wake-btn" onclick="toggleWake()">☀ Keep Screen On</button>
+        <button class="btn btn-outline" style="width:100%" id="wake-btn" onclick="toggleWake()">&#9728; Keep Screen On</button>
       </div>
     </div>
   </div>
@@ -248,14 +249,14 @@
   <div class="panel">
     <div class="panel-title">Signal Log</div>
     <div id="signal-log">
-      <div class="empty-log">⚡ Load config and connect, or paste data manually</div>
+      <div class="empty-log">&#9889; Load config and connect, or paste data manually</div>
     </div>
   </div>
 
 </main>
 
 <script>
-// ── State ─────────────────────────────────────────────────────────
+// -- State --------------------------------------------------------------
 const S = {
   rows:[], frame:null, frameSet:false, skipBuys:false,
   lastSigIdx:-99, cooldown:5,
@@ -267,10 +268,10 @@ const S = {
   proxyUrl: 'http://13.235.159.212:5000'
 };
 
-// ── Clock ──────────────────────────────────────────────────────────
+// -- Clock --------------------------------------------------------------
 setInterval(()=>{ document.getElementById('clock').textContent=new Date().toTimeString().slice(0,8); },1000);
 
-// ── Load Config from proxy ─────────────────────────────────────────
+// -- Load Config from proxy ---------------------------------------------
 async function loadConfig() {
   const url = document.getElementById('proxy-url').value.trim();
   S.proxyUrl = url;
@@ -283,24 +284,24 @@ async function loadConfig() {
     if (cfg.error) throw new Error(cfg.error);
     buildConfigUI(cfg);
     document.getElementById('config-section').classList.add('visible');
-    statusEl.textContent = '✓ Config loaded — select expiries and strikes, then tap FETCH & CONNECT';
+    statusEl.textContent = '\u2713 Config loaded \u2014 select expiries and strikes, then tap FETCH & CONNECT';
     statusEl.className = 'ok';
   } catch(e) {
-    statusEl.textContent = '✗ ' + e.message;
+    statusEl.textContent = '\u2717 ' + e.message;
     statusEl.className = 'err';
   }
 }
 
 function buildConfigUI(cfg) {
   const possibleStrikes = cfg.possibleStrikes || [5,10,15,20,25];
-  
+
   // BN expiries
   const bnEl = document.getElementById('bn-expiries');
   bnEl.innerHTML = '';
   (cfg.expiries.BANKNIFTY || []).forEach((exp,i) => {
     const label = document.createElement('label');
     label.className = 'expiry-item';
-    label.innerHTML = `<input type="checkbox" value="${exp}" ${i<2?'checked':''}> ${exp}`;
+    label.innerHTML = `<input type="checkbox" value="${exp}" ${"checked"}> ${exp}`;
     bnEl.appendChild(label);
   });
 
@@ -310,7 +311,7 @@ function buildConfigUI(cfg) {
   (cfg.expiries.NIFTY || []).forEach((exp,i) => {
     const label = document.createElement('label');
     label.className = 'expiry-item';
-    label.innerHTML = `<input type="checkbox" value="${exp}" ${i<2?'checked':''}> ${exp}`;
+    label.innerHTML = `<input type="checkbox" value="${exp}" ${"checked"}> ${exp}`;
     nfEl.appendChild(label);
   });
 
@@ -359,21 +360,21 @@ async function doFetch() {
       body: JSON.stringify(payload)
     });
     const fetchData = await fetchRes.json();
-    
+
     // Then GET /data for the tab-separated text
     const dataRes = await fetch(`${S.proxyUrl}/data`);
     const text = await dataRes.text();
     const lines = text.trim().split('\n').filter(l=>l.trim());
-    
+
     if (!lines.length) {
-      statusEl.textContent = 'Connected — no data yet (market closed?)';
+      statusEl.textContent = 'Connected \u2014 no data yet (market closed?)';
       statusEl.className = '';
       return;
     }
-    statusEl.textContent = `✓ Connected — ${lines.length} rows — ${new Date().toTimeString().slice(0,8)}`;
+    statusEl.textContent = `\u2713 Connected \u2014 ${lines.length} rows \u2014 ${new Date().toTimeString().slice(0,8)}`;
     statusEl.className = 'ok';
     lastRowEl.textContent = 'Last: ' + lines[lines.length-1].slice(0,80);
-    
+
     if (lines.length > S.lastRowCount) {
       S.lastRowCount = lines.length;
       const allRows = lines.map(parseRow).filter(Boolean);
@@ -381,7 +382,7 @@ async function doFetch() {
       processRows(allRows);
     }
   } catch(e) {
-    statusEl.textContent = '✗ ' + e.message;
+    statusEl.textContent = '\u2717 ' + e.message;
     statusEl.className = 'err';
   }
 }
@@ -396,7 +397,7 @@ function setLiveUI(live) {
   document.getElementById('status-label').textContent = live ? 'LIVE' : 'IDLE';
 }
 
-// ── Parse row ──────────────────────────────────────────────────────
+// -- Parse row ----------------------------------------------------------
 function parseRow(line) {
   const parts = line.trim().split(/[\t ,]+/);
   if (parts.length < 10) return null;
@@ -406,7 +407,20 @@ function parseRow(line) {
   return { time, CE_V:n(CE_V), PE_V:n(PE_V), CE_T:n(CE_T), PE_T:n(PE_T), CE_D:n(CE_D), PE_D:n(PE_D) };
 }
 
-// ── Signal engine ──────────────────────────────────────────────────
+// -- Star rating --------------------------------------------------------
+// base 1*, +1 if PE_V>=peMin, +1 if |ceSpike|>=thresh*2,
+// OVR1 floored at 1*, CASE7 (PE sustained lock) = 3*. ASCII only.
+function computeStars(o) {
+  if (o.isPE) return '***';                        // CASE7 PE Sustained Lock
+  let n = 1;                                        // base
+  if (o.peV >= o.peMin) n += 1;
+  if (Math.abs(o.ceSpike) >= o.thresh * 2) n += 1;
+  if (o.ovr1) n = Math.max(n, 1);                   // OVR1 floored at 1
+  n = Math.max(1, Math.min(3, n));
+  return '*'.repeat(n);
+}
+
+// -- Signal engine ------------------------------------------------------
 function processRows(rows) {
   const thresh = +document.getElementById('spike-thresh').value || 60;
   const peMin  = +document.getElementById('pe-min').value || 100;
@@ -423,7 +437,7 @@ function processRows(rows) {
     }
     if (Math.abs(r.CE_D)>2.0) continue;
     if (i-S.lastSigIdx < S.cooldown) continue;
-    
+
     const ceSpike = r.CE_V - prev.CE_V;
     const peSpike = r.PE_V - prev.PE_V;
     let triggered=false, isPE=false;
@@ -446,37 +460,48 @@ function processRows(rows) {
       if (theta<1.0) { sig='SELL'; ovr1=true; }
     }
 
-    if (sig==='BUY'&&S.skipBuys) { addLog(r,'skip','Skipped—PE_D>1.5 bear day'); S.cntSkip++; continue; }
-    if (sig==='BUY'&&!isPE&&r.PE_V<peMin) { addLog(r,'skip',`BUY skipped—PE=${r.PE_V.toFixed(1)}<${peMin}`); S.cntSkip++; continue; }
-    if (sig==='SELL'&&r.PE_V>=50) { addLog(r,'skip',`SELL skipped—PE=${r.PE_V.toFixed(1)}>=50`); S.cntSkip++; continue; }
-    if (Math.abs(r.CE_D)<0.3) { addLog(r,'skip',`OTM skip—CE_D=${r.CE_D.toFixed(2)}`); S.cntSkip++; continue; }
+    if (sig==='BUY'&&S.skipBuys) { addLog(r,'skip','Skipped\u2014PE_D>1.5 bear day'); S.cntSkip++; continue; }
+    if (sig==='BUY'&&!isPE&&r.PE_V<peMin) { addLog(r,'skip',`BUY skipped\u2014PE=${r.PE_V.toFixed(1)}<${peMin}`); S.cntSkip++; continue; }
+    if (sig==='SELL'&&r.PE_V>=50) { addLog(r,'skip',`SELL skipped\u2014PE=${r.PE_V.toFixed(1)}>=50`); S.cntSkip++; continue; }
+    if (Math.abs(r.CE_D)<0.3) { addLog(r,'skip',`OTM skip\u2014CE_D=${r.CE_D.toFixed(2)}`); S.cntSkip++; continue; }
 
     S.lastSigIdx=i;
-    const theta = (Math.abs(r.CE_T)>0&&Math.abs(r.PE_T)>0) ? (Math.abs(r.CE_T)/Math.abs(r.PE_T)).toFixed(2) : '—';
-    const detail = `${ovr1?'OVR1 ':isPE?'PE-LOCK ':''} CE=${r.CE_V.toFixed(1)} ΔCE=${ceSpike>0?'+':''}${ceSpike.toFixed(0)} PE=${r.PE_V.toFixed(1)} θ=${theta} CE_D=${r.CE_D.toFixed(2)}`;
+    const theta = (Math.abs(r.CE_T)>0&&Math.abs(r.PE_T)>0) ? (Math.abs(r.CE_T)/Math.abs(r.PE_T)).toFixed(2) : '\u2014';
+    const detail = `${ovr1?'OVR1 ':isPE?'PE-LOCK ':''} CE=${r.CE_V.toFixed(1)} \u0394CE=${ceSpike>0?'+':''}${ceSpike.toFixed(0)} PE=${r.PE_V.toFixed(1)} \u03B8=${theta} CE_D=${r.CE_D.toFixed(2)}`;
     const cls = ovr1?'ovr':sig.toLowerCase();
-    addLog(r, cls, detail);
+    const stars = computeStars({ peV:r.PE_V, peMin, ceSpike, thresh, ovr1, isPE });
+    addLog(r, cls, detail, stars);
     if (sig==='BUY') S.cntBuy++; else S.cntSell++;
     fireAlert(sig);
   }
   updateCounters();
 }
 
-function addLog(r, type, detail) {
+function addLog(r, type, detail, stars) {
   const log=document.getElementById('signal-log');
   const empty=log.querySelector('.empty-log');
   if (empty) empty.remove();
   const el=document.createElement('div');
   el.className=`sig ${type}`;
-  const label=type==='buy'?'▲ BUY':type==='sell'?'▼ SELL':type==='ovr'?'▼ OVR1 SELL':'— SKIP';
-  el.innerHTML=`<div class="sig-header"><span class="sig-type ${type}">${label}</span><span class="sig-time">${r.time}</span></div><div class="sig-detail">${detail}</div>`;
+  const label=type==='buy'?'\u25B2 BUY':type==='sell'?'\u25BC SELL':type==='ovr'?'\u25BC OVR1 SELL':'\u2014 SKIP';
+  const starHtml = stars ? `<span class="sig-stars">${stars}</span>` : '';
+  el.innerHTML=`<div class="sig-header"><span class="sig-type ${type}">${label}${starHtml}</span><span class="sig-time">${r.time}</span></div><div class="sig-detail">${detail}</div>`;
   log.insertBefore(el,log.firstChild);
+
+  // -- Persistent server-side log (POST to /logsignal, fire-and-forget) --
+  try {
+    fetch(`${S.proxyUrl}/logsignal`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ ts:new Date().toISOString(), time:r.time, type, stars:stars||'', detail })
+    }).catch(()=>{});
+  } catch(e){}
 }
 
 function updateBanner() {
   const b=document.getElementById('frame-banner');
   b.className=S.frame==='bull'?'bull':'bear';
-  b.textContent=S.frame==='bull'?'▲ BULL FRAME — NEG CE SPIKES = BUY REVERSALS':'▼ BEAR FRAME — NEG CE SPIKES = SELL CONTINUATIONS';
+  b.textContent=S.frame==='bull'?'\u25B2 BULL FRAME \u2014 NEG CE SPIKES = BUY REVERSALS':'\u25BC BEAR FRAME \u2014 NEG CE SPIKES = SELL CONTINUATIONS';
 }
 
 function updateCounters() {
@@ -486,16 +511,16 @@ function updateCounters() {
   document.getElementById('cnt-rows').textContent=S.rows.length;
 }
 
-// ── Alerts ─────────────────────────────────────────────────────────
+// -- Alerts -------------------------------------------------------------
 function fireAlert(type) {
   const isBuy=type==='BUY';
   const f=document.getElementById('flash');
   f.className='show '+(isBuy?'buy':'sell');
-  document.getElementById('flash-text').textContent=isBuy?'▲ BUY':'▼ SELL';
+  document.getElementById('flash-text').textContent=isBuy?'\u25B2 BUY':'\u25BC SELL';
   document.getElementById('flash-sub').textContent=isBuy?'ENTER LONG':'ENTER SHORT';
   playBeep(isBuy);
   if (navigator.vibrate) navigator.vibrate(isBuy?[200,100,200]:[400,100,400,100,400]);
-  if (S.notif) new Notification('Vega Live',{body:isBuy?'▲ BUY Signal':'▼ SELL Signal'});
+  if (S.notif) new Notification('Vega Live',{body:isBuy?'\u25B2 BUY Signal':'\u25BC SELL Signal'});
   setTimeout(()=>{f.className='';},2800);
 }
 
@@ -514,7 +539,7 @@ function playBeep(isBuy) {
   }catch(e){}
 }
 
-// ── Manual modes ───────────────────────────────────────────────────
+// -- Manual modes -------------------------------------------------------
 function analysePasted() {
   resetAll();
   const lines=document.getElementById('paste-area').value.trim().split('\n').filter(l=>l.trim());
@@ -552,9 +577,9 @@ function runDemo() {
 
 function resetAll() {
   Object.assign(S,{rows:[],frame:null,frameSet:false,skipBuys:false,lastSigIdx:-99,cntBuy:0,cntSell:0,cntSkip:0,lastRowCount:0,liveRows:[],liveMode:false});
-  document.getElementById('signal-log').innerHTML='<div class="empty-log">⚡ Load config and connect, or paste data manually</div>';
+  document.getElementById('signal-log').innerHTML='<div class="empty-log">\u26A1 Load config and connect, or paste data manually</div>';
   document.getElementById('frame-banner').className='';
-  document.getElementById('frame-banner').textContent='FRAME NOT SET — WAITING FOR 09:17 DATA';
+  document.getElementById('frame-banner').textContent='FRAME NOT SET \u2014 WAITING FOR 09:17 DATA';
   updateCounters();
 }
 
@@ -562,12 +587,12 @@ async function enableNotif() {
   if(!('Notification' in window))return;
   const p=await Notification.requestPermission();
   S.notif=p==='granted';
-  document.getElementById('notif-status').textContent=S.notif?'🔔 ON':'🔕 Permission denied';
+  document.getElementById('notif-status').textContent=S.notif?'\uD83D\uDD14 ON':'\uD83D\uDD15 Permission denied';
 }
 
 async function toggleWake() {
-  if(S.wakeLock){await S.wakeLock.release();S.wakeLock=null;document.getElementById('wake-btn').textContent='☀ Keep Screen On';}
-  else{try{S.wakeLock=await navigator.wakeLock.request('screen');document.getElementById('wake-btn').textContent='✓ Screen Locked On';}catch(e){}}
+  if(S.wakeLock){await S.wakeLock.release();S.wakeLock=null;document.getElementById('wake-btn').textContent='\u2600 Keep Screen On';}
+  else{try{S.wakeLock=await navigator.wakeLock.request('screen');document.getElementById('wake-btn').textContent='\u2713 Screen Locked On';}catch(e){}}
 }
 </script>
 </body>
